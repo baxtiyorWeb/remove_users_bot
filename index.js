@@ -205,6 +205,16 @@ bot.onText(/\/mute ?(\d+)?/, async (msg, match) => {
 	}
 
 	const userId = reply.from.id;
+	const senderId = msg.from.id;
+
+	// **Adminlikni tekshirish**
+	const senderMember = await bot.getChatMember(chatId, senderId);
+	if (!['administrator', 'creator'].includes(senderMember.status)) {
+		return bot.sendMessage(
+			chatId,
+			'⛔ Faqat adminlar bu buyruqni ishlata oladi!'
+		);
+	}
 
 	// 🛑 **Bot o‘zini mute qilishdan himoya**
 	if (userId === bot.id) {
@@ -264,6 +274,16 @@ bot.onText(/\/unmute/, async msg => {
 	}
 
 	const userId = reply.from.id;
+	const senderId = msg.from.id;
+
+	// **Adminlikni tekshirish**
+	const senderMember = await bot.getChatMember(chatId, senderId);
+	if (!['administrator', 'creator'].includes(senderMember.status)) {
+		return bot.sendMessage(
+			chatId,
+			'⛔ Faqat adminlar bu buyruqni ishlata oladi!'
+		);
+	}
 
 	// 🛑 **Botni o‘zini unmute qilishdan himoya**
 	if (userId === bot.id) {
