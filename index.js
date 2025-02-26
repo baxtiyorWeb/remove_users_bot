@@ -12,6 +12,26 @@ bot
 	})
 	.catch(err => {});
 
+async function checkBotAdmin(chatId) {
+	try {
+		const botMember = await bot.getChatMember(chatId, botInfo.id);
+		if (!['administrator', 'creator'].includes(botMember.status)) {
+			await bot.sendMessage(
+				chatId,
+				'⚠️ Iltimos, botga admin ruxsatlarini bering! Aks holda, bu buyruq ishlamaydi.'
+			);
+			return false;
+		}
+		return true;
+	} catch (error) {
+		await bot.sendMessage(
+			chatId,
+			'⚠ Xatolik yuz berdi! Botga adminlik berilganligini tekshiring.'
+		);
+		return false;
+	}
+}
+
 async function getAdminIds(chatId) {
 	try {
 		const admins = await bot.getChatAdministrators(chatId);
@@ -44,6 +64,11 @@ bot.onText(/clear_users/, async msg => {
 
 	if (!['supergroup', 'group'].includes(msg.chat.type)) {
 		return bot.sendMessage(chatId, 'Bu buyruq faqat guruh ichida ishlaydi!');
+	}
+
+	// Bot adminligini tekshiramiz
+	if (!(await checkBotAdmin(chatId))) {
+		return bot.sendMessage(chatId, '⛔ Bot bu guruhda admin emas!');
 	}
 
 	try {
@@ -158,7 +183,10 @@ bot.on('new_chat_members', async msg => {
 bot.onText(/\/remove_new_users/, async msg => {
 	const chatId = msg.chat.id;
 	const adminIds = await getAdminIds(chatId);
-
+	// Bot adminligini tekshiramiz
+	if (!(await checkBotAdmin(chatId))) {
+		return bot.sendMessage(chatId, '⛔ Bot bu guruhda admin emas!');
+	}
 	if (!adminIds.includes(msg.from.id)) {
 		return bot.sendMessage(
 			chatId,
@@ -176,7 +204,10 @@ bot.onText(/\/remove_new_users/, async msg => {
 bot.onText(/\/allow_new_users/, async msg => {
 	const chatId = msg.chat.id;
 	const adminIds = await getAdminIds(chatId);
-
+	// Bot adminligini tekshiramiz
+	if (!(await checkBotAdmin(chatId))) {
+		return bot.sendMessage(chatId, '⛔ Bot bu guruhda admin emas!');
+	}
 	if (!adminIds.includes(msg.from.id)) {
 		return bot.sendMessage(
 			chatId,
@@ -195,6 +226,10 @@ bot.onText(/\/allow_new_users/, async msg => {
 bot.onText(/\/mute ?(\d+)?/, async (msg, match) => {
 	const chatId = msg.chat.id;
 	const duration = match[1] ? parseInt(match[1]) : 0; // Agar vaqt kiritilmasa, cheksiz mute
+	// Bot adminligini tekshiramiz
+	if (!(await checkBotAdmin(chatId))) {
+		return bot.sendMessage(chatId, '⛔ Bot bu guruhda admin emas!');
+	}
 	const reply = msg.reply_to_message;
 
 	if (!reply) {
@@ -265,7 +300,10 @@ bot.onText(/\/mute ?(\d+)?/, async (msg, match) => {
 bot.onText(/\/unmute/, async msg => {
 	const chatId = msg.chat.id;
 	const reply = msg.reply_to_message;
-
+	// Bot adminligini tekshiramiz
+	if (!(await checkBotAdmin(chatId))) {
+		return bot.sendMessage(chatId, '⛔ Bot bu guruhda admin emas!');
+	}
 	if (!reply) {
 		return bot.sendMessage(
 			chatId,
